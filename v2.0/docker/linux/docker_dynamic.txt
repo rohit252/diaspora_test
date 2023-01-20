@@ -1,0 +1,80 @@
+3 / 3
+
+To import a new TAR file into a running MySQL container's database schema without having to restart the container, you can use the volumes configuration in the docker-compose.yml file to mount a host directory to the container's data directory and then use the mysql command-line client inside the container to import the TAR file into the database schema.
+
+Here is an example of how you can map the host directory ./data to the container's data directory /var/lib/mysql in the docker-compose.yml file:
+
+Copy code
+services:
+  mysql:
+    image: mysql:latest
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+Then you can place the new TAR file in the host directory, for example ./data in this case, and it will automatically be available inside the container at /var/lib/mysql.
+
+Next, you can use the docker exec command to open a shell inside the running MySQL container and use the mysql command-line client to import the TAR file into the database schema.
+
+Copy code
+docker exec -it mysql /bin/bash
+Once you are inside the container, you can use the following commands to extract the TAR file and import the SQL files into the schema:
+
+Copy code
+tar -xvf /var/lib/mysql/<new_TAR_file>.tar -C /var/lib/mysql
+mysql -u <username> -p<password> <database_name> < /var/lib/mysql/<sqlfile>.sql
+
+mysql -u [username] -p[password] -e "CREATE DATABASE new_db;USE new_db;source /path/to/dumpfile.sql;"
+
+
+
+services:
+
+
+  jenkins:
+    build: ./jenkins
+    image: jenkins
+
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
+    privileged: true
+
+    user: root
+
+
+
+    volumes:
+      - ./jenkins/.jen:/var/jenkins_home
+
+
+  graphdb:
+    build: ./graphdb
+    image: graphdb
+    ports:
+      - "7200:7200"
+
+  db:
+    #build: ./mysql
+    image:mysql
+    volumes:
+      - ./mysql:/var/lib/mysql
+    #image: mysql
+    #volumes:
+
+  #    - ./mysql:/app/data
+   #   - ./mysql:/docker-entrypoint-initdb.d
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: diaspora_v2
+        MYSQL_USER: user
+        MYSQL_PASSWORD: pass
+    ports:
+      - "42333:3306"
+
+
+tar -xzvf diaspora_v2.tar.gz
